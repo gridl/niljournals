@@ -1,55 +1,63 @@
 
 import sys
 import xlrd
+import pprint
 
-from optparse import OptionParser
-from collections import namedtuple
-from mapping import JournalEntry
-
-# Options holds the command line options
-Options = namedtuple("Options", "JournalFilter YearFilter KeywordFilter OutputFile InputFile")
-
-# Parses the command line options
-def parse_commandline():
-    parser = OptionParser(usage='%prog [options] <Excel File>')
-
-    parser.add_option('-j', '--journal-filter',
-                      dest="journal_filter",
-                      default=None,
-                      help="Limit output to a sepcific set of journals"
-                      )
-    parser.add_option('-y', '--year-filter',
-                      dest="year_filter",
-                      default=None,
-                      help="Limit output to a sepcific year or year range"
-                      )
-    parser.add_option('-k', '--keyword-filter',
-                      dest="keyword_filter",
-                      default=None,
-                      help="Limit output to a sepcific set of keywords"
-                      )
-    parser.add_option('-o', '--output',
-                      dest="output_file",
-                      default=None,
-                      help="Write results to file instead of screen"
-                      )
-
-    options, remainder = parser.parse_args()
-
-    if len(remainder) != 1:
-        parser.print_help()
-        sys.exit(-1)
-
-    return Options(
-        JournalFilter=options.journal_filter,
-        YearFilter=options.year_filter,
-        KeywordFilter=options.keyword_filter,
-        OutputFile=options.output_file,
-        InputFile=remainder[0]
-    )
+from mapping import JournalEntry, ColumnMap as CM
+from cmdlineparser import Options, parse_commandline
 
 
 def main():
     """Entry point for the application script"""
 
-    options = parse_commandline()
+    # Parse the command line
+    try:
+        options = parse_commandline()
+
+    except Exception, ex:
+        print str(ex)
+        sys.exit(-1)
+
+    # Open the Excel file via xlrd
+    try:
+        book = xlrd.open_workbook(options.InputFile)
+        # for now we always use the first sheet of the file
+        sh = book.sheet_by_index(0)
+        print " * Using Excel sheet '%s' with %d rows as input data." % (sh.name, sh.nrows)
+
+    except Exception, ex:
+        print str(ex)
+        sys.exit(-1)
+
+    # Print options again so the user can double-check
+    if options.OutputFile == None:
+        output = "screen"
+    else:
+        output = "file '%s'" % options.OutputFile
+
+    print " * Generating output dataset with the following options:"
+    print "   * Journal filter  : %s" % (options.JournalFilter)
+    print "   * Keyword filter  : %s" % (options.KeywordFilter)
+    print "   * Year filter     : %s" % (options.YearFilter)
+    print "   * Output to       : %s" % (output)
+
+    # Now we can do the actual parsing
+
+    for rx in range(1,sh.nrows):
+        # print "%s : %s" % (rx, sh.row(0)[rx])
+        row = sh.row(rx)
+
+        je = JournalEntry(
+            ArticleTitle=row[CM['ArticleTitle']],
+            ArticleAuthors=row[CM['ArticleAuthors']],
+            ArticleCorrespondenceAuthor=row[CM['ArticleCorrespondenceAuthor']],
+            ArticleAbstract=row[CM['ArticleAbstract']],
+            ArticleSubjectTerms=row[CM['ArticleSubjectTerms']],
+            JournalTitle=row[CM['JournalTitle']],
+            JournalDate=row[CM['JournalDate']],
+            JournalCountry=row[CM['JournalCountry']],
+            JournalIssue=row[CM['JournalIssue']],
+            JournalVolume=row[CM['JournalVolume']],
+            JournalYear=row[CM['JournalYear']])
+        pp = pprint.PrettyPrinter(depth=6)
+        pp.pprint(je)
