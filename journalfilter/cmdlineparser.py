@@ -35,10 +35,22 @@ def parse_commandline():
         parser.print_help()
         raise Exception("Wrong numer of arguments")
 
+    # parse keywords
+    keywords = options.keyword_filter.replace(' ','').split(",")
+
+    # parse year filter (range)
+    years_str = options.year_filter.replace(' ','').split("-")
+    if len(years_str) == 1:
+        years_int = range(int(years_str[0]))
+    elif len(years_str) == 2:
+        years_int = range(int(years_str[0]), int(years_str[1]))
+    else:
+        raise Exception("Wrong year filter format. Either single value (2001) or range (2001-2005)")
+
     return Options(
         JournalFilter=options.journal_filter,
-        YearFilter=options.year_filter,
-        KeywordFilter=options.keyword_filter,
+        YearFilter=years_int,
+        KeywordFilter=keywords,
         OutputFile=options.output_file,
         InputFile=remainder[0]
     )

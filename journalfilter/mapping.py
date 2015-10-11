@@ -1,4 +1,4 @@
-from collections import namedtuple
+from recordclass import recordclass
 
 """
     ColumnMap maps the JournalEntry field to the corresponding Excel column.
@@ -35,7 +35,7 @@ ColumnMap = {
 """
     The JournalEntry named tuple holds a single publication record.
 """
-JournalEntry = namedtuple("JournalEntry", "ArticleTitle ArticleAuthors ArticleCorrespondenceAuthor \
+JournalEntry = recordclass("JournalEntry", "ArticleTitle ArticleAuthors ArticleCorrespondenceAuthor \
                                            ArticleAbstract ArticleSubjectTerms JournalTitle \
                                            JournalDate JournalCountry JournalIssue JournalVolume \
                                            JournalYear")
