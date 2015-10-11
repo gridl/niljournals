@@ -62,9 +62,30 @@ def main():
             JournalYear=row[CM['JournalYear']].value)
 
         # Remove the '*' from ArticleSubjectTerms
-        je.ArticleSubjectTerms = je.ArticleSubjectTerms.replace("*", "")
+        je.ArticleSubjectTerms = je.ArticleSubjectTerms.replace("*", "").replace(" ", "").lower().split(",")
         je.JournalYear = int(je.JournalYear)
+
+        je.ArticleTitle = je.ArticleTitle.lower()
+        je.ArticleAbstract = je.ArticleAbstract.lower()
 
         journals.append(je)
 
-    # print journals
+    output = list()
+
+    for journal in journals:
+
+        # match year
+        if journal.JournalYear in options.YearFilter:
+            # match keywords
+            for kw in options.KeywordFilter:
+                if kw in journal.ArticleSubjectTerms:
+                    output.append(journal)
+                    pprint.pprint( journal )
+                    print ""
+                    break
+
+
+
+    # print output
+
+    print "\n Results: %d" % len(output)

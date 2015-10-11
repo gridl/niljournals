@@ -36,7 +36,7 @@ def parse_commandline():
         raise Exception("Wrong numer of arguments")
 
     # parse keywords
-    keywords = options.keyword_filter.replace(' ','').split(",")
+    keywords = options.keyword_filter.replace(' ','').lower().split(",")
 
     # parse year filter (range)
     years_str = options.year_filter.replace(' ','').split("-")
@@ -45,7 +45,7 @@ def parse_commandline():
     elif len(years_str) == 2:
         years_int = range(int(years_str[0]), int(years_str[1]))
     else:
-        raise Exception("Wrong year filter format. Either single value (2001) or range (2001-2005)")
+        raise Exception("Wrong year filter format. Either use a single value (2001) or range (2001-2005)")
 
     return Options(
         JournalFilter=options.journal_filter,
