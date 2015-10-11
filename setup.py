@@ -105,6 +105,8 @@ setup(
     entry_points={
         'console_scripts': [
             'journalfilter=journalfilter:main',
+            'journalexplorer=journalexplorer:main',
+
         ],
     },
 )
