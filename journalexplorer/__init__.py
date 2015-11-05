@@ -41,15 +41,19 @@ def main():
     for rx in range(1,sh.nrows):
         row = sh.row(rx)
 
+        # skip empty rows
+        if row[CM['ArticleTitle']].value == '':
+            continue
+
         je = JournalEntry(
             ArticleTitle=row[CM['ArticleTitle']].value,
             ArticleAuthors=row[CM['ArticleAuthors']].value,
-            ArticleCorrespondenceAuthor=row[CM['ArticleCorrespondenceAuthor']].value,
+            # ArticleCorrespondenceAuthor=row[CM['ArticleCorrespondenceAuthor']].value,
             ArticleAbstract=row[CM['ArticleAbstract']].value,
             ArticleSubjectTerms=row[CM['ArticleSubjectTerms']].value,
             JournalTitle=row[CM['JournalTitle']].value,
             JournalDate=row[CM['JournalDate']].value,
-            JournalCountry=row[CM['JournalCountry']].value,
+            # JournalCountry=row[CM['JournalCountry']].value,
             JournalIssue=row[CM['JournalIssue']].value,
             JournalVolume=row[CM['JournalVolume']].value,
             JournalYear=row[CM['JournalYear']].value)
