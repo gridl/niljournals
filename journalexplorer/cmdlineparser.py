@@ -39,7 +39,9 @@ def parse_commandline():
 
     # parse abstract filters
     if options.abstract_filter is not None:
-        abstracts = options.abstract_filter.replace(' ','').lower().split(",")
+        #abstracts = options.abstract_filter.replace(' ','').lower().split(",")
+        abstracts = options.abstract_filter.lower().split(",")
+
     else:
         abstracts = None
 
