@@ -92,14 +92,19 @@ def main():
                     abstract_match = False;
 
         if (options.AbstractFilter is not None) and (abstract_match == True):
-            if journal.JournalYear in output:
-                output[journal.JournalYear]['counter'] += 1
-                output[journal.JournalYear]['articles'].append(journal.ArticleTitle)
-            else:
+            if journal.JournalYear not in output:
+                # output[journal.JournalYear]['counter'] += 1
+                # output[journal.JournalYear]['articles'].append(journal.ArticleTitle)
+            # else:
                 output[journal.JournalYear] = dict()
-                output[journal.JournalYear]['counter'] = 1
-                output[journal.JournalYear]['articles'] = list()
-                output[journal.JournalYear]['articles'].append(journal.ArticleTitle)
+                # output[journal.JournalYear]['counter'] = 1
+                # output[journal.JournalYear]['articles'] = list()
+
+            jname = journal.JournalTitle
+            if jname not in output[journal.JournalYear]:
+                output[journal.JournalYear][jname] = list()
+
+            output[journal.JournalYear][jname].append(journal.ArticleTitle)
 
 
             # output.append(journal)
@@ -110,4 +115,4 @@ def main():
 
     pprint.pprint(output)
 
-    print "\n Results: %d" % len(output)
+    # print "\n Results: %d" % len(output)
