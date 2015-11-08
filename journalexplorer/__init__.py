@@ -1,6 +1,7 @@
 
 import sys
 import xlrd
+import json
 import pprint
 
 from mapping import JournalEntry, ColumnMap as CM
@@ -36,7 +37,7 @@ def main():
 
     # Now we can do the actual parsing. First we sanitize and throw all the data into a record
     # list and do some
-    journals = list()
+    articles = list()
 
     for rx in range(1,sh.nrows):
         row = sh.row(rx)
@@ -53,7 +54,7 @@ def main():
             ArticleSubjectTerms=row[CM['ArticleSubjectTerms']].value,
             JournalTitle=row[CM['JournalTitle']].value,
             JournalDate=row[CM['JournalDate']].value,
-            # JournalCountry=row[CM['JournalCountry']].value,
+            # articleCountry=row[CM['articleCountry']].value,
             JournalIssue=row[CM['JournalIssue']].value,
             JournalVolume=row[CM['JournalVolume']].value,
             JournalYear=row[CM['JournalYear']].value)
@@ -65,56 +66,60 @@ def main():
         je.ArticleTitle = je.ArticleTitle.lower()
         je.ArticleAbstract = je.ArticleAbstract.lower()
 
-        journals.append(je)
+        articles.append(je)
 
     output = dict()
 
-    for journal in journals:
+    # loop over all articles
+    for article in articles:
 
-        # match year
+        jname = article.JournalTitle
+        year = article.JournalYear
 
-        if options.YearFilter is not None:
-            if journal.JournalYear not in options.YearFilter:
-                break
+        # Create year if it doesn't exist
+        if year not in output:
+            output[year] = dict()
 
-        # match keywords
-        keyword_match = True;
-        if options.KeywordFilter is not None:
-            for kw in options.KeywordFilter:
-                if kw not in journal.ArticleSubjectTerms:
-                    keyword_match = False;
+        # Creat journal if it doesn't exits
+        if article.JournalTitle not in output[year]:
+            output[year][jname] = dict()
+            output[year][jname]['total'] = 0
+            output[year][jname]['matches'] = 0
+            # output[year][jname]['matches_percent'] = 0
 
-        # match abstracts
+
+            if options.ShowTitles:
+                output[year][jname]['titles'] = list()
+
+
+        # Count the total articles per journal per year
+        output[year][jname]['total'] += 1
+
+        # Match abstracts
         if options.AbstractFilter is not None:
             abstract_match = True;
             for akw in options.AbstractFilter:
-                if akw not in journal.ArticleAbstract:
+                if akw not in article.ArticleAbstract:
                     abstract_match = False;
 
         if (options.AbstractFilter is not None) and (abstract_match == True):
-            if journal.JournalYear not in output:
-                # output[journal.JournalYear]['counter'] += 1
-                # output[journal.JournalYear]['articles'].append(journal.ArticleTitle)
-            # else:
-                output[journal.JournalYear] = dict()
-                # output[journal.JournalYear]['counter'] = 1
-                # output[journal.JournalYear]['articles'] = list()
-
-            jname = journal.JournalTitle
-            jcounter = journal.JournalTitle
-
-            if jname not in output[journal.JournalYear]:
-                output[journal.JournalYear][jname] = dict()
-
-                if options.ShowTitles:
-                    output[journal.JournalYear][jname]['titles'] = list()
-                output[journal.JournalYear][jname]['count'] = 0
-
+            output[year][jname]['matches'] += 1
             if options.ShowTitles:
-                output[journal.JournalYear][jname]['titles'].append(journal.ArticleTitle)
-            output[journal.JournalYear][jname]['count'] += 1
+                output[year][jname]['titles'].append(article.ArticleTitle)
 
+        # Calculate perentages
+        for year in output:
+            for journal in output[year]:
+                entry = output[year][journal]
+                entry['matches_percent'] = 100.0 / entry['total'] * entry['matches']
 
-    pprint.pprint(output)
+    # Formatted and colored output
+    #
+    formatted_json = json.dumps(output, sort_keys=False, indent=4)
+
+    from pygments import highlight, lexers, formatters
+    colorful_json = highlight(unicode(formatted_json, 'UTF-8'), lexers.JsonLexer(), formatters.TerminalFormatter())
+    print(colorful_json)
+
 
     # print "\n Results: %d" % len(output)
