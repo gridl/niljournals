@@ -51,14 +51,6 @@ def parse_commandline():
     else:
         keywords = None
 
-    # parse abstract filters
-    if options.abstract_filter is not None:
-        #abstracts = options.abstract_filter.replace(' ','').lower().split(",")
-        abstracts = options.abstract_filter.lower().split(",")
-
-    else:
-        abstracts = None
-
     # parse year filter (range)
     if options.year_filter is not None:
         years_str = options.year_filter.replace(' ','').split("-")
@@ -74,7 +66,7 @@ def parse_commandline():
     return Options(
         YearFilter=years_int,
         KeywordFilter=keywords,
-        AbstractFilter=abstracts,
+        AbstractFilter=options.abstract_filter,
         ShowTitles=options.show_titles,
         Percentage=options.percentage,
         InputFile=remainder[0]

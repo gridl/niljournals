@@ -7,9 +7,10 @@ import pprint
 from mapping import JournalEntry, ColumnMap as CM
 from cmdlineparser import Options, parse_commandline
 
-
+##########################################################################################
+#
+#
 def main():
-    """Entry point for the application script"""
 
     # Parse the command line
     try:
@@ -30,10 +31,43 @@ def main():
         print str(ex)
         sys.exit(-1)
 
+    # parse abstract filters
+    if options.AbstractFilter is not None:
+        abstracts = options.AbstractFilter.lower().split(",")
+
+    else:
+        abstracts = None
+
     print "\n * Generating keyword timeline with the following options:"
-    print "   * Abstract filter : %s" % (options.AbstractFilter)
+    print "   * Abstract filter : %s" % (abstracts)
     print "   * Keyword filter  : %s" % (options.KeywordFilter)
     print "   * Year filter     : %s" % (options.YearFilter)
+
+    output = analyze(options.InputFile, options.ShowTitles, abstracts, options.KeywordFilter, options.YearFilter)
+
+    formatted_json = json.dumps(output, sort_keys=False, indent=4)
+
+    from pygments import highlight, lexers, formatters
+    colorful_json = highlight(unicode(formatted_json, 'UTF-8'), lexers.JsonLexer(), formatters.TerminalFormatter())
+    print(colorful_json)
+
+
+##########################################################################################
+#
+#
+def analyze(inputfile, show_titles, abstract_filter, keyword_filter, year_filter):
+    """Entry point for the application script"""
+
+    # Open the Excel file via xlrd
+    try:
+        book = xlrd.open_workbook(inputfile)
+        # for now we always use the first sheet of the file
+        sh = book.sheet_by_index(0)
+        print "\n * Using Excel sheet '%s' with %d rows of data." % (sh.name, sh.nrows)
+
+    except Exception, ex:
+        print str(ex)
+        sys.exit(-1)
 
     # Now we can do the actual parsing. First we sanitize and throw all the data into a record
     # list and do some
@@ -85,26 +119,23 @@ def main():
             output[year][jname] = dict()
             output[year][jname]['total'] = 0
             output[year][jname]['matches'] = 0
-            # output[year][jname]['matches_percent'] = 0
 
-
-            if options.ShowTitles:
+            if show_titles:
                 output[year][jname]['titles'] = list()
-
 
         # Count the total articles per journal per year
         output[year][jname]['total'] += 1
 
         # Match abstracts
-        if options.AbstractFilter is not None:
+        if abstract_filter is not None:
             abstract_match = True;
-            for akw in options.AbstractFilter:
+            for akw in abstract_filter:
                 if akw not in article.ArticleAbstract:
                     abstract_match = False;
 
-        if (options.AbstractFilter is not None) and (abstract_match == True):
+        if (abstract_filter is not None) and (abstract_match == True):
             output[year][jname]['matches'] += 1
-            if options.ShowTitles:
+            if show_titles:
                 output[year][jname]['titles'].append(article.ArticleTitle)
 
         # Calculate perentages
@@ -113,13 +144,4 @@ def main():
                 entry = output[year][journal]
                 entry['matches_percent'] = 100.0 / entry['total'] * entry['matches']
 
-    # Formatted and colored output
-    #
-    formatted_json = json.dumps(output, sort_keys=False, indent=4)
-
-    from pygments import highlight, lexers, formatters
-    colorful_json = highlight(unicode(formatted_json, 'UTF-8'), lexers.JsonLexer(), formatters.TerminalFormatter())
-    print(colorful_json)
-
-
-    # print "\n Results: %d" % len(output)
+    return output
