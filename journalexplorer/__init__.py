@@ -101,16 +101,18 @@ def main():
                 # output[journal.JournalYear]['articles'] = list()
 
             jname = journal.JournalTitle
+            jcounter = journal.JournalTitle
+
             if jname not in output[journal.JournalYear]:
-                output[journal.JournalYear][jname] = list()
+                output[journal.JournalYear][jname] = dict()
 
-            output[journal.JournalYear][jname].append(journal.ArticleTitle)
+                if options.ShowTitles:
+                    output[journal.JournalYear][jname]['titles'] = list()
+                output[journal.JournalYear][jname]['count'] = 0
 
-
-            # output.append(journal)
-            # pprint.pprint( journal )
-            # print ""
-
+            if options.ShowTitles:
+                output[journal.JournalYear][jname]['titles'].append(journal.ArticleTitle)
+            output[journal.JournalYear][jname]['count'] += 1
 
 
     pprint.pprint(output)

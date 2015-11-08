@@ -2,7 +2,7 @@ from optparse import OptionParser
 from collections import namedtuple
 
 # Options holds the command line options
-Options = namedtuple("Options", "YearFilter KeywordFilter AbstractFilter InputFile")
+Options = namedtuple("Options", "YearFilter KeywordFilter ShowTitles AbstractFilter InputFile")
 
 # Parses the command line options
 def parse_commandline():
@@ -23,6 +23,13 @@ def parse_commandline():
                       dest="abstract_filter",
                       default=None,
                       help="Limit output to a sepcific set of keywords"
+                      )
+
+    parser.add_option('-t', '--show-titles',
+                      dest="show_titles",
+                      default=None,
+                      action="store_true",
+                      help="Show titles in addition to the occurence count"
                       )
 
     options, remainder = parser.parse_args()
@@ -61,5 +68,6 @@ def parse_commandline():
         YearFilter=years_int,
         KeywordFilter=keywords,
         AbstractFilter=abstracts,
+        ShowTitles=options.show_titles,
         InputFile=remainder[0]
     )
