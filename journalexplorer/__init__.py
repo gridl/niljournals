@@ -58,6 +58,9 @@ def main():
 def analyze(inputfile, show_titles, abstract_filter, keyword_filter, year_filter):
     """Entry point for the application script"""
 
+    if type(keyword_filter) != list:
+        keyword_filter = [keyword_filter]
+
     # Open the Excel file via xlrd
     try:
         book = xlrd.open_workbook(inputfile)
